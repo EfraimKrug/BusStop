@@ -1,0 +1,33 @@
+/* tables for update and delete selections */
+/* printed from FORM.php - function buildForm(...) */
+#centerTable {
+		border:2px solid black;
+		}
+/* center of the page - including an iframe */
+.name {
+		color:#913929;
+		font-size:12px;
+		}
+/* choices in sliding menus on right side */
+.description {
+		text-align:left;
+		font-size:12px;
+		text-decoration:underline;
+		color:#913929;
+		}
+/* for return on form validation */
+.formError {
+	color: #FF0000;
+	color:#913929;
+	font-size:10px;
+	text-align:left;
+	padding:5px;
+	}
+
+.formID {
+	color:#913929;
+	font-size:10px;
+	text-align:left;
+	}
+
+		
