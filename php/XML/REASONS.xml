@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<entries>
+<entry><number>1</number><reason>I found someone else</reason><points>1</points></entry>
+<entry><number>2</number><reason>Someone else found me</reason><points>2</points></entry>
+<entry><number>3</number><reason>I gave someone a newspaper</reason><points>3</points></entry>
+<entry><number>4</number><reason>Someone else gave me a newspaper</reason><points>4</points></entry>
+<entry><number>5</number><reason>I shook hands with someone else</reason><points>3</points></entry>
+<entry><number>6</number><reason>I gave someone a cup of coffee</reason><points>3</points></entry>
+<entry><number>7</number><reason>Someone else gave me a cup of coffee</reason><points>4</points></entry>
+<entry><number>8</number><reason>Two of us went to meet someone else</reason><points>5</points></entry>
+<entry><number>9</number><reason>Two people came to meet me</reason><points>5</points></entry>
+<entry><number>10</number><reason>We (5 people) said "HUMMA HUMMA HOO HA!"</reason><points>7</points></entry>
+<entry><number>11</number><reason>We had a political discussion</reason><points>3</points></entry>
+<entry><number>12</number><reason>We had a religious discussion</reason><points>3</points></entry>
+<entry><number>13</number><reason>We had a literary discussion</reason><points>3</points></entry>
+<entry><number>14</number><reason>We had a academic discussion</reason><points>3</points></entry>
+<entry><number>15</number><reason>Excuse yourself and offer someone a kleenex</reason><points>3</points></entry>
+<entry><number>16</number><reason>Someone offered you a kleenex</reason><points>3</points></entry>
+</entries>

@@ -19,7 +19,7 @@ while($row = $dbObj->getNextRecord())
 	}
 }
 
-echo "<br>================ D U M P I N G === T H E ===  E D U L A T E ===  D A T A B A S E  ==========================<br>";
+echo "<br>================ D U M P I N G === T H E ===  <U>B U S - S T O P</U> ===  D A T A B A S E  ==========================<br>";
 $dbObject = DBFactory::getFactory()->getDB("Local");
 $dbObject->dumpTable("BPerson");
 dumpTable($dbObject, "BPerson");
@@ -28,7 +28,10 @@ dumpTable($dbObject, "BStation");
 $dbObject->dumpTable("BTime");
 dumpTable($dbObject, "BTime");
 $dbObject->dumpTable("BPersonStationTime");
-dumpTable($dbObject, "BPersonStationTimee");
+dumpTable($dbObject, "BPersonStationTime");
+$dbObject->dumpTable("BConnection");
+dumpTable($dbObject, "BConnection");
+
 
 //$dbObject->DBClose();
 ?>

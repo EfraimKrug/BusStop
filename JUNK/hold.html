@@ -1,0 +1,56 @@
+  
+
+
+ <script type="text/javascript"> <!-- this jQuery loads the reverse geo codes into the form -->
+	$(document).ready(function() {
+	//I'm not doing anything else, so just leave
+		if(!navigator.geolocation) return;
+			navigator.geolocation.getCurrentPosition(function(pos) {
+			geocoder = new google.maps.Geocoder();
+			var latlng = new google.maps.LatLng(pos.coords.latitude,pos.coords.longitude);	
+			document.getElementById("Lat").value = pos.coords.latitude;
+			document.getElementById("Lon").value = pos.coords.longitude;
+			geocoder.geocode({'latLng': latlng}, function(results, status) {
+					var result = results[0];
+					document.getElementById("Place").value = result.formatted_address;
+					document.getElementById("Place2").value = result.formatted_address;
+					alert(result.formatted_address);
+			});
+		});
+	});
+</script>
+<script type="text/javascript">
+//=============================================
+// this function gets long/lat coordinates and passes them to
+// the two functions below - in the case of success or failure
+//
+function getLocationConstant()
+{
+	alert("HERE in Loc... Const");
+    if(navigator.geolocation)
+    {
+        navigator.geolocation.getCurrentPosition(onGeoSuccess,onGeoError);
+    } else {
+        alert("Your browser or device doesn't support Geolocation");
+    }
+}
+
+// success
+// load the form element values (mostly hidden) with the google.maps information
+// as long as I am loading the form - I may as well grab the phone number and the
+// time - which I will also need to post.
+function onGeoSuccess(event)
+{
+    document.getElementById("Lat").value = event.coords.latitude;
+    document.getElementById("Lon").value = event.coords.longitude;
+    document.getElementById("Lat2").value = event.coords.latitude;
+    document.getElementById("Lon2").value = event.coords.longitude;
+}
+
+// OMG! Failure. Bummer.
+function onGeoError(event)
+{
+    alert("Error code " + event.code + ". " + event.message);
+}
+
+</script>

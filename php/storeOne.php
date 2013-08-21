@@ -3,67 +3,85 @@
 <!--[if gt IE 8]><!--> 
 <html lang="en" > <!--<![endif]-->
 <?php
-/**
- * for testing:
- *
- *foreach ($_POST as $k => $v){
- *	echo "<br>" . $k . " - - >" . $v;
- *	}
- *exit;
- **/
-// end testing...
-
-/*************************************************************
- * index.php:
- * 1) starts the session
- * 2) checks parameter for returning with errors...
- *		- if we got further along with no 'user name'
- * 3) retrieves cookies for returning visitor
- * 4) presents 2 forms
- * 		- 1 entry for user
- *		- 2 just to see who is here - you can get a list 
- *			without giving any info at all
- *************************************************************
- *** 1) starts the session   */
 session_start();
 include 'DB2.php';
-include './XML/xmlManipulation.php';
+//include './XML/xmlManipulation.php';
+//foreach ($_POST as $k=>$v){
+//	echo "<br>" . $k . "- - - >" . $v;
+//	}
+//exit;
 $ENVIRONMENT = "Test";
+
 /**
  * we get the 'found/was found' information... 
  * form - what happened / get phone number
- * remember - anything on most is the record of the other participant...
  **/
-$message = "";
-if($_POST['name'] == $_SESSION['user']){
-	$message = "Self enlightenment is a wonderful thing...";
+ 
+/* only one reason is processed at a time */
+$reason = array();
+$reason = explode("@", $_POST['reason']);
+$reasonNumber = $reason[2];
+$reasonPoints = $reason[1];
+
+/* active (I)/passive partners (U) */
+$Uname = array();
+$Iname = array();
+
+foreach ($_POST as $k => $v){
+	if(preg_match("/^UNAME/", $k)){
+		$Uname[] = $v;
+		}
+	if(preg_match("/^INAME/", $k)){
+		$Iname[] = $v;
+		}
 	}
 	
-$stationID = 0;
-$timeID = 0;
-if(isset($_POST['StationID'])){
-	$stationID = $_POST['StationID'];
+$dbObject = DBFactory::getFactory()->getDB($ENVIRONMENT);
+$userID = $dbObject->getPersonID($_POST['name']);
+$timeID = $_POST['TimeID'];
+$stationID = $_POST['StationID'];
+//$PSTID = $dbObject->getPSTID($userID, $stationID, $timeID);
+
+$UnameNumbers = array();
+$InameNumbers = array();
+foreach ($Uname as $u){
+	$UnameNumbers[$u] = $dbObject->getPersonID($u);
 	}
-if(isset($_POST['TimeID'])){
-	$timeID = $_POST['TimeID'];
+foreach ($Iname as $i){
+	$InameNumbers[$i] = $dbObject->getPersonID($i);
 	}
 
-/******************************************************************
- * there are two types of possible connections
- * one - our person (user) was active (I)
- * two - our person (user) was passive (U)
- * and each person he/she connects to also can be either
- ******************************************************************/
-$IotherName = array();
-$UotherName = array();
-foreach ($_POST as $e => $v){
-	if(preg_match("/^I/", $e)){
-		$IotherName[] = preg_replace("/^I/", "", $e);
-		}
-	if(preg_match("/^U/", $e)){
-		$UotherName[] = preg_replace("/^U/", "", $e);
-		}
+$insertArray = array();
+//$timeID = getTimeID();
+//$pstID = getPST_ID();
+
+foreach ($UnameNumbers as $e){
+	//echo "<br>Storing: $e";
+	$dbObject->insertConnection($userID, $e, $reasonNumber, $reasonPoints, $timeID, $stationID);
+	//$xml = "INSERT INTO BConnection (PERSON_ID, PST_ID, OTHER_PERSON_ID, REASON_NUMBER, POINTS, TIME_ID, STATION_ID) ";
+	//$xml .= " VALUES ($userID, $PSTID, $e, $reasonNumber, $reasonPoints, $timeID, $stationID)";
+		//$dbObject = DBFactory::getFactory()->getDB($ENVIRONMENT);
+	//	$dbObject->runRawSQL($xml);
 	}
+
+foreach ($InameNumbers as $e){
+	//echo "<br>Storing: $e";
+	$dbObject->insertConnection($userID, $e, $reasonNumber, $reasonPoints, $timeID, $stationID);
+		//$dbObject = DBFactory::getFactory()->getDB($ENVIRONMENT);
+		//$dbObject->runRawSQL($xml);
+	}
+
+header("Location: ../index.php?problem=nothing");		
+/**
+ * "CREATE TABLE BConnection  
+ * (ID smallint NOT NULL AUTO_INCREMENT,
+ * PERSON_ID smallint NOT NULL,
+ * PST_ID smallint NOT NULL,
+ * OTHER_PERSON_ID smallint NOT NULL,
+ * REASON_NUMBER smallint NOT NULL,
+ * POINTS smallint NOT NULL,
+ * TIME_ID smallint NOT NULL,
+ **/
 ?>
 <html>
 <head>
@@ -87,53 +105,6 @@ foreach ($_POST as $e => $v){
 
 	<div class="row">
 		<div class="large-8 columns">
-		<?php 
-			if(isset($_SESSION['user']))
-			{
-				echo "<i>Remember, everyone checks in for themselves!</i>";
-				echo "<h4> What did we do? (Metaphorically) speaking!</h4>";
-			} 
-			/**
-			 * only one action with any number of people can be logged at a time
-			 * action: from select
-			 * people: U (I was the passive recipient) or I (I was the active) people...
-			 * eg: 2 people find me... U: (me) and I: (the two people)
-			 * or: Me and someone else find another: I and someone else are Inames, another is Uname.
-			 **/
-			$arr = getWholeArray();
-			echo "<table width=365>";
-			echo "<form action='./storeOne.php' method='post'><tr><td>What did you do? <select name=reason>";
-				
-			foreach ($arr as $x => $y){
-				//$hold = $y['reason'] . "@" . $y['points'] . "@" . $y['number'];
-				//echo "<option name='" . $y['reason'] . "@" . $y['points'] . "@" . $y['number']  . "'>" . $y['reason'] . "[" . $hold . "]" ;
-				echo "<option value='" . $y['reason'] . "@" . $y['points'] . "@" . $y['number']  . "'>" . $y['reason'];
-				}
-			echo "</select></td></tr>";
-			if(isset($_SESSION['phone'])){
-				echo "<tr><td>Phone Number: <input type='text' name='phone' size='10' value='" . $_SESSION['phone'] . "'></tr></td>";
-				}
-			else {
-				echo "<tr><td>Phone Number: <input type='text' name='phone' size='10' placeholder='to identify you for gifts!'></tr></td>";
-				}
-			echo "<tr><td><input type='submit' name='submit' value='I did that!'></tr></td>";
-			echo "<input type=hidden name=lat value=" . $_SESSION['latitude'] . ">";
-			echo "<input type=hidden name=lon value=" . $_SESSION['longitude'] . ">";
-			echo "<input type=hidden name=name value=" . $_SESSION['user'] . ">";
-			echo "<input type=hidden name=StationID value=" . $stationID . ">";
-			echo "<input type=hidden name=TimeID value=" . $timeID . ">";
-
-			$i = 0;
-			foreach ($IotherName as $n){
-				echo "<input type=hidden name=INAME" . $i++ . " value=" . $n . ">";
-				}
-			$i = 0;
-			foreach ($UotherName as $n){
-				echo "<input type=hidden name=UNAME" . $i++ . " value=" . $n . ">";
-				}
-
-			echo "</form></table>";
-		?>
 
 			<!-- Database access: find other people for the same times/geoCodes/Days -->
 			<div class="row">

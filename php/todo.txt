@@ -1,7 +1,9 @@
 todo:
 
 css - make it look good... size for phones!
-create the 'foundOne.php' database load...
-(need a new db table - 'found' PersonID,PersonID)
 
 form accepts check box, looks up new person...
+
+
+how do we clean up players files?
+ i.e. delete anyone who has not changed their score within a month?

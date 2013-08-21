@@ -3,17 +3,97 @@
 <!--[if gt IE 8]><!--> 
 <html lang="en" > <!--<![endif]-->
 <?php
+$ENVIRONMENT = "Test";
+// check geo coordinates - if we don't have them go back...
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+	if(isset($_POST['Lat2']) && isset($_POST['Lon2'])){
+		if (($_POST['Lat2'] == 0) || ($_POST['Lon2'] == 0)){
+			header("Location: ../index.php?problem=nogeo");
+			}
+		}
+	else {
+		header("Location: ../index.php?problem=noname");
+		}
+	}
+/*************************************************************
+ * WhoIsHere2.php:
+ * 1) starts the session
+ * 2) finds the username: determines action script for the form
+ *		- checks cookie
+ *		- checks session
+ *		- checks $_GET parameters
+ * 3) set the $_SESSION variables from the incoming form
+ * 4) figure out the time parameters for attendees at station
+ * 5) figure out the geo parameters for attendees at station
+ * 6) present form -
+ *		- everyone who has signed in at this station/time
+ *************************************************************
+ * 1) start the session
+ * 2) find the username: determines action script for the form
+ **/
 session_start();
 include 'DB2.php';
-// based on 'now' - get minumum and maximum times
-// for a 40 minute period
-// Create date objects, add/subtract time, then format them to strings
+if(isset($_COOKIE['user'])){
+	$name = $_COOKIE['user'];
+	}
+if (isset($_SESSION['user'])){
+	$name = $_SESSION['user'];
+	}
+if(isset($_GET['name'])){	
+	$name = $_GET['name'];
+	}
 
+$_SESSION['user'] = $name;
+
+//if($_SESSION['user'] == ""){
+//	header("Location: ../index.php?problem=noname");
+//	exit;
+//	}
+
+ /**
+ * 3) set the $_SESSION variables from the incoming form
+ **/
+if(!isset($_POST['Lon2']))
+{
+	$Lon2 = $_GET['Lon2'];
+}
+else 
+{
+	$Lon2 = $_POST['Lon2'];
+}
+$_SESSION['longitude'] = $Lon2;
+if(!isset($_POST['Lat2']))
+{
+	$Lat2 = $_GET['Lat2'];
+}
+else 
+{
+	$Lat2 = $_POST['Lat2'];
+}
+$_SESSION['latitude'] = $Lat2;
+if(!isset($_POST['Place2']))
+{
+	$Place2 = $_GET['Place2'];
+}
+else 
+{
+	$Place2 = $_POST['Place2'];
+}
+$_SESSION['place'] = $Place2;
+
+/**
+ * 4) figure out the time parameters for attendees at station
+ * Station attendance is anyone who arrives on that day of the week
+ * within a 40 minute time block. We calculate the 40 minutes by adding
+ * and subtracting 20 minutes from the current time
+ **/
 date_default_timezone_set("UTC");
 $TimeZone = new DateTimeZone('America/New_York');
-//$DtTime = new DateTime('now', $TimeZone);
 $dtMin = new DateTime('now', $TimeZone);
 $dtMax = new DateTime('now', $TimeZone);
+
+//what day is it?
+$wd = $dtMin->format('l');
 
 $dI = new DateInterval('P0000-00-00T00:20:00');
 $dtMax->add($dI);
@@ -22,32 +102,41 @@ $dtMin->sub($dI);
 $dtMinF = $dtMin->format('Y-m-d H:i:s');
 $dtMaxF = $dtMax->format('Y-m-d H:i:s');
 
-//$dtMax = new DateTime(date('Y-m-d H:i:s'));
-
-
 //keep the times in two arrays 
 $timeMinArr = explode(":", $dtMin->format('H:i'));
 $timeMaxArr = explode(":", $dtMax->format('H:i'));
 $timeMin = $dtMin->format('H:i:s');
 $timeMax = $dtMax->format('H:i:s');
 
-//what day is it?
-$wd = date('l');
-
-//analyze geo coordinates from the form -
-//parse minumum and maximum
-$arrLon = explode('.', $_POST['Lon2']);
+/**
+ * 5) figure out the geo parameters for attendees at station
+ * analyze geo coordinates from the form -
+ * parse minumum and maximum (about 20 foot radius)
+ **/
+$arrLon = explode('.', $Lon2);
 $lonMin = (int)substr($arrLon[1],0,7);
 $lonMin -= 8;
 $lonMax =  $lonMin + 16;
-$arrLat = explode('.', $_POST['Lat2']);
+$arrLat = explode('.', $Lat2);
 $latMin = (int)substr($arrLat[1],0,7);
 $latMin -= 8;
 $latMax = $latMin + 16;
 
-if($_SERVER["REQUEST_METHOD"] == "POST"){
-//SELECT EVERYONE WHO COMES TO THE STATION AT THE TIME...	
+//*************************************************************
+// select clauses to find everyone at the station
+// store information in geo coordinates
+// but retrieve it by location! let google figure it out...
+//*************************************************************
 $where = " WHERE  
+		P.ID = X.PERSON_ID and
+		S.ID = X.STATION_ID and
+		T.ID = X.TIME_ID and
+		S.FORMATTED_ADDRESS = '" . $Place2 . "' and
+		T.WEEK_DAY = '$wd' and
+		T.TIME_OF_DAY >= '$timeMin' and
+		T.TIME_OF_DAY <= '$timeMax'";
+
+$_where = " WHERE  
 		P.ID = X.PERSON_ID and
 		S.ID = X.STATION_ID and
 		T.ID = X.TIME_ID and
@@ -60,11 +149,27 @@ $where = " WHERE
 		T.WEEK_DAY = '$wd' and
 		T.TIME_OF_DAY >= '$timeMin' and
 		T.TIME_OF_DAY <= '$timeMax'";
+
+// in case of midnight riders...
+if($timeMin > $timeMax){
+	$where = " WHERE  
+		P.ID = X.PERSON_ID and
+		S.ID = X.STATION_ID and
+		T.ID = X.TIME_ID and
+		S.LONG_BASE = $arrLon[0] and
+		S.LAT_BASE = $arrLat[0] and
+		S.LONG_DEC <= $lonMax and
+		S.LONG_DEC >= $lonMin and
+		S.LAT_DEC <= $latMax and
+		S.LAT_DEC >= $latMin and
+		T.WEEK_DAY = '$wd' and
+		((T.TIME_OF_DAY >= '$timeMin' and T.TIME_OF_DAY <= '24:00:00') or
+		(T.TIME_OF_DAY <= '$timeMax' and T.TIME_OF_DAY >= '00:00:00'))";
 		}
 ?>
 <head><meta charset="utf-8" />
   <meta name="viewport" content="width=device-width" />
-  <title>I Wonder Who Is Here!</title>
+  <title>Everybody gotta find somebody!</title>
 
   <link rel="stylesheet" href="../css/foundation.css" />
   <link rel="stylesheet" href="../css/busstop.css" />
@@ -72,59 +177,6 @@ $where = " WHERE
   <script src="../js/vendor/custom.modernizr.js"></script>
   <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
   <script type="text/javascript" src="../js/vendor/jquery.js" ></script>
-
-<script type="text/javascript">
-function doit(){
-	alert('hello');
-	}
-</script>
-<script>
-// this script is flipping the picture - individuals to people engaged in 
-// animated conversation... 
-$(document).ready(function() {
-	$('.circular').mouseover(function()
-		{
-			jQuery('.circular').css("background-image", "url('./img/meeting04.jpg')");
-		});
-	$('.circular').mouseout(function()
-		{
-		
-			$(".circular").stop().animate({opacity: 0},1000,function(){
-					$(this).css({'background-image': "url('./img/BWCrowd.jpg')"})
-					.animate({opacity: 1},{duration:1000});
-				});
-		});
-	$('#Place1').val('kansas');
-	getLocation();
-	});
-</script>
-<script>
-// geolocation code
-function getLocation()
-  {
-  if (navigator.geolocation)
-    {
-    navigator.geolocation.getCurrentPosition(showPosition);
-    }
-  }
-function showPosition(position)
-  {
-  $('#Latitude1').val(position.coords.latitude);
-  $('#Latitude2').val(position.coords.latitude);
-  $('#Longitude1').val(position.coords.longitude);
-  $('#Longitude2').val(position.coords.longitude);
-  }
-</script>
-<style>
-.circular {
-	width: 300px;
-	height: 300px;
-	border-radius: 150px;
-	-webkit-border-radius: 150px;
-	-moz-border-radius: 150px;
-	background: url('./img/BWCrowd.jpg') no-repeat; 
-	}
-</style>
 </head>
 <body>
 	<div class="row">
@@ -139,7 +191,8 @@ function showPosition(position)
 			<?php 
 			if(isset($_SESSION['user']))
 			{
-				echo "<h3>The people... welcome you (metaphorically) back!</h3>";
+				echo "<h4>" . $_SESSION['place'] . "<br>(metaphorically) speaking!</h4>";
+				$user = $_SESSION['user'];
 			} else {
 				$_SESSION['user'] = 'USER';
 				echo "<h3>The People... make contact!</h3>";
@@ -147,21 +200,38 @@ function showPosition(position)
 
 			<!-- Database access: find other people for the same times/geoCodes/Days -->
 			<div class="row">
-				<div class="large-6 columns">
+				<div class="large-12 columns">
 					<?php
+					/**
+					 * 6) present form -
+					 *		- everyone who has signed in at this station/time
+					 *		- if we don't have user - set form action back to index.php
+					 **/
+
 					$firstRow = True;
-					$dbObject = DBFactory::getFactory()->getDB("Local");
+					$dbObject = DBFactory::getFactory()->getDB($ENVIRONMENT);
 					$someoneThere = 0;
 					if ($dbObject->selectBX($where))
 					{
 					if($dbObject->getRowCount() > 0){
 						$repeatName = array();
-						echo "<table><form action='./foundOne.php' method='post'>";
+						// no name - allow them to see who is listed.... and go back to index.php
+						if($user == ""){
+							echo "<table class=wideform><form action='../index.php?problem=noname' method='get'>";
+							}
+						else {
+							echo "<table class=wideform><form action='./foundOne.php' method='post'>";
+							}
+						echo "<input type=hidden name=lat value=" . $_SESSION['latitude'] . ">";
+						echo "<input type=hidden name=lon value=" . $_SESSION['longitude'] . ">";
+						echo "<input type=hidden name=name value=" . $_SESSION['user'] . ">";
 						while($row = $dbObject->getNextRecord())
 						{
 							if($firstRow)
 							{
-								echo "<h5>" . $row['FORMATTED_ADDRESS'] . "</h5>";
+								//echo "<h5>" . $row['FORMATTED_ADDRESS'] . "</h5>";
+								echo "<input type=hidden name=TimeID value=" . $row['TIME_ID'] . ">";
+								echo "<input type=hidden name=StationID value=" . $row['STATION_ID'] . ">";
 								$firstRow = False;
 							}
 							foreach ($row as $idx => $val){
@@ -178,7 +248,7 @@ function showPosition(position)
 								}
 							}
 						}
-					echo "<tr><td></td><td></td><td><input type='submit' name='submit' value='Remember!'></td></tr></form></table>";
+					echo "<tr><td></td><td></td><td></td><td><input type='submit' name='submit' value='Remember!'></td></tr></form></table>";
 					}
 					// Go get an "alone" quotation... if nobody else is listed!
 					// Opportunity to get a gift...
@@ -188,7 +258,7 @@ function showPosition(position)
 						echo "<br><br></font><font color=blue>Text to: 34546</font>";
 						}
 					}
-					$dbObject->DBClose();
+					//$dbObject->DBClose();
 					?>
 				</div>
 			</div>
@@ -201,12 +271,23 @@ function showPosition(position)
 
 		<div class="large-4 columns">
 			<h4>Getting Started</h4>
-			<p>We think this is a great idea... and we hope you do to! When you are standing someplace, waiting and there are others around who are also waiting... 
+			<div id="rightSide">We think this is a great idea... and we hope you do to! When you are standing someplace, waiting and there are others around who are also waiting... 
 			maybe you can meet someone else! Check out if they logged onto our site... the logon matches day of the week and time of day and location - so 
-			anyone who was waiting in about the same place, about the same time... if they signed in here you will see them!</p>
-			<p>If you find each other, tell us and get points! 248 points gets you a free meal at a locally participating restaurant!</p>
-
-			<h4>Other Stuff</h4>
+			anyone who was waiting in about the same place, about the same time... if they signed in here you will see them!</div>
+			<p>
+			<div id="rightSide">If you find each other, tell us and get points! 248 points gets you a free meal at a locally participating restaurant!</div>
+			</p>
+			<h4>How are you doing?</h4>
+			<div id="rightSide">
+			<?php
+				$userID = $_SESSION['user'];
+				echo $userID . " Point Tally: ";
+				$uNum = $dbObject->getPersonID($userID);
+				//echo "NUMBER: " . $uNum;
+				$dbObject->getPoints($uNum);
+				echo $dbObject->getHold('Points');
+			?>
+			</div>
 			<!--
 			<p>You should check out:</p>
 			<ul class="disc">
@@ -263,15 +344,35 @@ function showPosition(position)
 </body>
 </html>
 <?php
+/**
+ * displaying a row of our table
+ * @param an array from mysqli
+ **/
 function display_record($r){
-	echo "<tr><td><div class=name>" . 
-		$r['NAME'] . "</div></td>:<td><div class=description> " . 
-		$r['DESCRIPTION'] . "</div></td><td><input type='checkbox' name=" . $r['NAME'] . " value=True></td></tr>";
+	if($_SESSION['user']  == $r['NAME']){
+		echo "<tr><td><div class=itsYou>";
+		echo $r['NAME'] . "</div></td><td><div class=description> " . 
+		$r['DESCRIPTION'] . "</div></td><td></td><td></td></tr>";
+		}
+	else {
+		echo "<tr><td><div class=name>";
+		echo $r['NAME'] . "</div></td><td><div class=description> " . 
+		$r['DESCRIPTION'] . "</div></td><td><div class=boxtag>I found them <input type='checkbox' name=I" . 
+		$r['NAME'] . " value=True></div></td><td><div class=boxtag>They found me <input type='checkbox' name=U" . 
+		$r['NAME'] . " value=True></div></td></tr>";		
+		}
 }
 
-// comparing tabled time on accessed record to
-// real system time.... in MinArr and MaxArr
-// arrays are {Hours, Minutes}
+
+/**
+ * comparing tabled time on accessed record to
+ * real system time.... in MinArr and MaxArr
+ * arrays are {Hours, Minutes}
+ * @param $val - datetime from the database return
+ * @return - true - time is within our 40 minute period 
+ *		   - false - time is not within...
+ * @affect - loads two global arrays with minimum/maximum times
+ **/
 
 function time_is_right($val){
 global $timeMinArr, $timeMaxArr;
@@ -305,9 +406,9 @@ if(($tableTimeArr[0] == $timeMinArr[0]) && ($tableTimeArr[0] < $timeMaxArr[0])){
 	}
 }
 
-/*
+/**
  * test harness for time_is_right...
- */
+ **/
 function test_time_is_right(){
 global $dtMin, $dtMax;
 global $timeMinArr, $timeMaxArr;

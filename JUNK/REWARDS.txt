@@ -1,0 +1,96 @@
+<winnings>
+<prize>
+<points>5</points>
+<reward>most found (found more than anyone else at the stop)</reward>
+</prize>
+<prize>
+<points>2</points>
+<reward>found once (good!)</reward></prize>
+<prize>
+<points>7</points>
+<reward>found most (found more people than anyone else at the stop)</reward>
+</prize>
+<prize>
+<points>2</points>
+<reward>found one (good!)</reward>
+</prize>
+<prize>
+<points>15</points>
+<reward>wallflower (only one not found)</reward>
+</prize>
+<prize>
+<points>1</points>
+<reward>dope (only one who didn't find anybody)</reward>
+</prize>
+<prize>
+<points>5</points>
+<reward>first one at the stop logged in</reward>
+</prize>
+<prize>
+<points>10</points>
+<reward>first one 3 consecutive days at the stop</reward>
+</prize>
+<prize>
+<points>15</points>
+<reward>first one 5 consecutive days at the stop</reward>
+</prize>
+<prize>
+<points>10</points>
+<reward>first one 3 days in one week at the stop</reward>
+</prize>
+<prize>
+<points>12</points>
+<reward>first one 5 days in one week at the stop</reward>
+</prize>
+<prize>
+<points>3</points>
+<reward>last one at the stop yesterday</reward></prize>
+<prize>
+<points>17</points>
+<reward>first one to give someone a newspaper</reward>
+</prize>
+<prize>
+<points>19</points>
+<reward>first one to give someone a coffee</reward>
+</prize>
+<prize>
+<points>25</points>
+<reward>first two to shake hands</reward>
+</prize>
+<prize>
+<points>30</points>
+<reward>first two to agree to meet someone else</reward>
+</prize>
+<prize>
+<points>10</points>
+<reward>first one met by two people</reward>
+</prize>
+<prize>
+<points>5</points>
+<reward>met by two people</reward>
+</prize>
+<prize>
+<points>50</points>
+<reward>first five to say "humma humma hoo hah!" together!</reward>
+</prize>
+<prize>
+<points>10</points>
+<reward>first political discussion</reward>
+</prize>
+<prize>
+<points>10</points>
+<reward>first religous discussion</reward>
+</prize>
+<prize>
+<points>10</points>
+<reward>first literary discussion</reward>
+</prize>
+<prize>
+<points>10</points>
+<reward>first academic discussion</reward>
+</prize>
+<prize>
+<points>10</points>
+<reward>first one to get the quotation</reward>
+</prize>
+</winnings>

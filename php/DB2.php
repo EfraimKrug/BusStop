@@ -94,12 +94,12 @@ class DBAccess implements DBInterface
 		if($this->Level == "Prod"){
 				try 
 				{	
-				$DBConn = new mysqli("efraimmkrugcom.domaincommysql.com","edulateprod","lilmod_613");
+				$DBConn = new mysqli("efraimmkrugcom.domaincommysql.com","busstop","stop_01");
 				if(mysqli_connect_errno()){
 					$this->ErrorMessage = 'Database connection problems in Production. ';
 					throw new DataBaseException();
 					}
-				if(!$DBConn->select_db("edulateprod")){
+				if(!$DBConn->select_db("busstop")){
 					$this->ErrorMessage = 'Database selection problems in Production: ';
 					throw new DataBaseException();
 					}
@@ -202,7 +202,7 @@ class DBAccess implements DBInterface
 	 */
 	public function dumpTable($table)
 	{
-	$tableNames = array("BPerson",  "BStation",  "BTime",  "BPersonStationTime"); 
+	$tableNames = array("BPerson",  "BStation",  "BTime",  "BPersonStationTime", "BConnection", "BContact"); 
 						
 	if(in_array($table,$tableNames))
 		{
@@ -238,7 +238,10 @@ class DBAccess implements DBInterface
 	 */
 	public function insertStation($longBase, $longDec, $latBase, $latDec, $fmtAddress)
 	{
-		if($this->getStationID($longBase, $longDec, $latBase, $latDec) > 0){
+		//if($this->getStationID($longBase, $longDec, $latBase, $latDec) > 0){
+//		echo "<br>in insertStation";
+		if($this->getStationID($fmtAddress) > 0){
+//			echo "<br>past getStationID(" . $fmtAddress . ")";
 			$this->resultSet = null;
 			$this->Error = -1;
 			$this->ErrorMessage = "This station has already been posted to the database!";
@@ -275,13 +278,18 @@ class DBAccess implements DBInterface
 	 *  @param $name - data input
 	 *  @return 1 row of person
 	 */
-	public function getStationID($longBase, $longDec, $latBase, $latDec)
+	//public function getStationID($longBase, $longDec, $latBase, $latDec)
+	public function getStationID($fmtAddress)
 	{
-		$sql = "SELECT ID FROM BStation WHERE LONG_BASE = " .
-		$longBase . " AND LONG_DEC = " . 
-		$longDec . " AND LAT_BASE = " .
-		$latBase . " AND LAT_DEC = " . $latDec;
+//		echo "<br>inside getStationID(" . $fmtAddress . ")";
+		$sql = "SELECT ID FROM BStation WHERE FORMATTED_ADDRESS = '" . $fmtAddress . "'";
+//		$sql = "SELECT ID FROM BStation WHERE LONG_BASE = " . $longBase
+//		. " AND LONG_DEC = " . 
+//		$longDec . " AND LAT_BASE = " .
+//		$latBase . " AND LAT_DEC = " . $latDec;
 
+		//echo $sql;
+		//exit;
 		try 
 		{
 			if(!$this->resultSet = $this->Connection->query($sql)){
@@ -306,7 +314,7 @@ class DBAccess implements DBInterface
 	 *  @param $name/$description - data input
 	 *  @return insert result
 	 */
-	public function insertPerson($name, $description)
+	public function insertPerson($name, $description, $phone)
 	{
 		if($this->getPersonID($name) > 0){
 			$this->resultSet = null;
@@ -315,8 +323,8 @@ class DBAccess implements DBInterface
 			return $this->resultSet;
 			}
 			
-		$sql = "INSERT INTO BPerson (NAME, DESCRIPTION)
-		VALUES ('" . $name . "', '" . $description . "')";		
+		$sql = "INSERT INTO BPerson (NAME, DESCRIPTION, PHONE)
+		VALUES ('" . $name . "', '" . $description . "', '" . $phone . "')";		
 
 		//echo $sql;
 		try 
@@ -351,13 +359,14 @@ class DBAccess implements DBInterface
 			if(!$this->resultSet = $this->Connection->query($sql)){
 				throw new DataBaseException();
 			}
+			
 			$row = $this->getNextRecord();
 			$this->setHold("PersonID", $row['ID']);
 			return $row['ID'];
 		} 
 		catch(DataBaseException $e)
 			{
-				$this->ErrorMessage = 'Could not insert into the BPerson Table';
+				$this->ErrorMessage = 'Could not select from the BPerson Table';
 				$this->ErrorMessage .= mysql_error();
 				$this->Error = 98;
 				echo $e->errorMessage($this->ErrorMessage, $this->Error);
@@ -379,6 +388,15 @@ class DBAccess implements DBInterface
 	$dt = $DtTime->format('Y-m-d H:i:s');
 	$tod = $DtTime->format('H:i:s');
 	$wd = $DtTime->format('l');
+	//echo "$dt, $tod, $wd";
+	//exit;
+		if($this->getTimeID($wd, $dt) > 0){
+			$this->resultSet = null;
+			$this->Error = -1;
+			$this->ErrorMessage = $wd . " @ " . $tod . " has already been posted to the database!";
+			return $this->resultSet;
+			}
+
 	$sql = "INSERT INTO BTime (WEEK_DAY, DATE_TIME, TIME_OF_DAY)
 			VALUES ('" . $wd . "', '" . $dt . "', '" . $tod . "')";		
 
@@ -401,6 +419,47 @@ class DBAccess implements DBInterface
 	
 
 	/*
+	 *  Find Time Record...
+	 *  @param $name - data input
+	 *  @return 1 row of person
+	 */
+	public function getTimeID($wd, $tod)
+	{
+	date_default_timezone_set("UTC");
+	$TimeZone = new DateTimeZone('America/New_York');
+	//$DtTime = new DateTime('now', $TimeZone);
+	$dtMin = new DateTime('now', $TimeZone);
+	$dtMax = new DateTime('now', $TimeZone);
+
+	$dI = new DateInterval('P0000-00-00T00:02:00');
+	$dtMax->add($dI);
+	$dtMin->sub($dI);
+
+	$dtMinF = $dtMin->format('H:i:s');
+	$dtMaxF = $dtMax->format('H:i:s');
+
+		$sql = "SELECT ID FROM BTime WHERE WEEK_DAY = '" . $wd . "' AND TIME_OF_DAY <= '" . $dtMaxF . "' AND TIME_OF_DAY >= '" . $dtMinF . "'";
+		try 
+		{
+			if(!$this->resultSet = $this->Connection->query($sql)){
+				throw new DataBaseException();
+			}
+			$row = $this->getNextRecord();
+			$this->setHold("TimeID", $row['ID']);
+			return $row['ID'];
+		} 
+		catch(DataBaseException $e)
+			{
+				$this->ErrorMessage = 'Could not insert into the BTime Table';
+				$this->ErrorMessage .= mysql_error();
+				$this->Error = 98;
+				echo $e->errorMessage($this->ErrorMessage, $this->Error);
+			}		
+		return -1;
+	}
+	
+
+	/*
 	 *  Insert PST - ie PersonStationTime...
 	 *  @param 
 	 *  @return insert result
@@ -410,8 +469,6 @@ class DBAccess implements DBInterface
 	$sql = "INSERT INTO BPersonStationTime (PERSON_ID, STATION_ID, TIME_ID)
 			VALUES (" . $Person . "," . $Station . "," . $Time . ")";		
 
-		echo $sql;
-		
 		try 
 		{
 			if(!$this->resultSet = $this->Connection->query($sql)){
@@ -429,7 +486,108 @@ class DBAccess implements DBInterface
 		return $this->resultSet;
 	}
 	
+	/*
+	 *  Find PST Record...
+	 *  @param $name - data input
+	 *  @return 1 row of person
+	 */
+	public function getPSTID($personID, $stationID, $timeID)
+	{
 
+		$sql = "SELECT ID FROM BPersonStationTime WHERE PERSON_ID=" . $personID .
+				" AND STATION_ID=" . $stationID . 
+				" AND TIME_ID=" . $timeID;
+		try 
+		{
+			if(!$this->resultSet = $this->Connection->query($sql)){
+				throw new DataBaseException();
+			}
+			$row = $this->getNextRecord();
+			$this->setHold("PSTID", $row['ID']);
+			return $row['ID'];
+		} 
+		catch(DataBaseException $e)
+			{
+				$this->ErrorMessage = 'Could not select from the BPersonStationTime Table';
+				$this->ErrorMessage .= mysql_error();
+				$this->Error = 98;
+				echo $e->errorMessage($this->ErrorMessage, $this->Error);
+			}		
+		return -1;
+	}
+	
+
+	/*
+	 *  Insert BConnection - ie Tally station!
+	 *  @param 
+	 *  @return insert result
+	 */
+	public function insertConnection($personID, $otherPersonID, $reasonNumber, $reasonPoints, $timeID,$stationID)
+	{
+	$sql = "INSERT INTO BConnection (PERSON_ID, OTHER_PERSON_ID, REASON_NUMBER, POINTS, TIME_ID, STATION_ID) ";
+	$sql .= " VALUES ($personID, $otherPersonID, $reasonNumber, $reasonPoints, $timeID, $stationID)";
+	//echo $sql;
+	//exit;
+		try 
+		{
+			if(!$this->resultSet = $this->Connection->query($sql)){
+				throw new DataBaseException();
+			}
+			echo "Successful store";
+		} 
+		catch(DataBaseException $e)
+			{
+				$this->ErrorMessage = 'Could not insert into the BConnection Table';
+				$this->ErrorMessage .= mysql_error();
+				$this->Error = 96;
+				echo $e->errorMessage($this->ErrorMessage, $this->Error);
+			}		
+		$this->setLastInsertKey();
+		return $this->resultSet;
+	}
+	
+
+	
+	/*
+	 *  Get points ...
+	 *  @param $name - data input
+	 *  @return int: number of points tallied
+	 */
+	public function getPoints($personID)
+	{
+
+		$sql = "SELECT SUM(POINTS) FROM BConnection WHERE PERSON_ID=" . $personID;
+		//echo "INSIDE getPoints";
+		//echo $sql;
+		//exit;
+		try 
+		{
+			if(!$this->resultSet = $this->Connection->query($sql)){
+				throw new DataBaseException();
+			}
+			$this->setHold("Points", 0);
+			$row = $this->getNextRecord();
+			//foreach ($row as $e=>$v){
+			//	echo "<br>{" . $e . "}//" . $v;
+			//	}
+			//exit;
+			if(isset($row['SUM(POINTS)'])){
+				$this->setHold("Points", $row['SUM(POINTS)']);
+				//echo "HERE: " . $row['SUM(POINTS)'];
+				//exit;
+				}
+			return True;
+		} 
+		catch(DataBaseException $e)
+			{
+				$this->ErrorMessage = 'Could not select from the BConnection Table';
+				$this->ErrorMessage .= mysql_error();
+				$this->Error = 98;
+				echo $e->errorMessage($this->ErrorMessage, $this->Error);
+			}		
+		return False;
+	}
+	
 	
 	/*
 	 *  Distinct categories within the program

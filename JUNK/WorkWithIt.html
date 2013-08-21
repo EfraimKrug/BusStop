@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<!--[if IE 8]> 				 <html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> 
+<html lang="en" > <!--<![endif]-->
+
+<head><meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>I  Wonder Who Is Here!</title>
+
+  <link rel="stylesheet" href="css/foundation.css" />
+ 
+  <script src="js/vendor/custom.modernizr.js"></script>
+  <script type="text/javascript" src="./js/vendor/jquery.js" ></script>
+
+<script type="text/javascript">
+function doit(){
+	alert('hello');
+	}
+</script>
+<script>
+$(document).ready(function() {
+	$('.circular').mouseover(function()
+		{
+			jQuery('.circular').css("background-image", "url('./img/AirportSleep01.jpg')");
+		});
+	$('.circular').mouseout(function()
+		{
+		
+			$(".circular").stop().animate({opacity: 0},1000,function(){
+					$(this).css({'background-image': "url('./img/4KidsWaiting.jpg')"})
+					.animate({opacity: 1},{duration:1000});
+				});
+			//jQuery('.circular').css("background-image", "url('./img/4KidsWaiting.jpg')");
+			//jQuery('.circular').animate({
+			//	width:'600px',
+			//	background-image:"url('./img/4KidsWaiting.jpg')"
+			//},"slow")
+		});
+	});
+</script>
+<style>
+.circular {
+	width: 300px;
+	height: 300px;
+	border-radius: 150px;
+	-webkit-border-radius: 150px;
+	-moz-border-radius: 150px;
+	background: url('./img/4KidsWaiting.jpg') no-repeat;
+	}
+</style>
+
+</head>
+<body onload="doit()">
+
+<div class="circular" ></div>
+
+</body>
+</html>

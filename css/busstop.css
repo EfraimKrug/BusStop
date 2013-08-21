@@ -3,16 +3,45 @@
 #centerTable {
 		border:2px solid black;
 		}
+#rightSide {
+		color:#913929;
+		font-size:12px;
+		width:248px;
+		}
+/* circular picture */
+.circular {
+	width: 300px;
+	height: 300px;
+	border-radius: 150px;
+	-webkit-border-radius: 150px;
+	-moz-border-radius: 150px;
+	background: url('../img/BWCrowd.jpg') no-repeat; 
+	}
+
 /* center of the page - including an iframe */
-.name {
+.name  {
 		color:#913929;
 		font-size:12px;
 		}
+
+/* center of the page - including an iframe */
+.itsYou  {
+		color:#000000;
+		font-size:12px;
+		border:2px solid red;
+		text-align:center;
+		}
+		
+.boxtag  {
+		color:#913929;
+		font-size:12px;
+		}
+
 /* choices in sliding menus on right side */
 .description {
 		text-align:left;
 		font-size:12px;
-		text-decoration:underline;
+		text-decoration:emphasis;
 		color:#913929;
 		}
 /* for return on form validation */
@@ -29,5 +58,7 @@
 	font-size:10px;
 	text-align:left;
 	}
-
+.wideform {
+	width:650px;
+	}
 		

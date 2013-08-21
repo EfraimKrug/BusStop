@@ -1,0 +1,26 @@
+PATH:
+
+index.html =>
+	check cookie...
+
+post48 => 
+	get user/description/latitude/longitude/address
+	
+	
+WhoIsHere2 =>
+	check if I have user:
+		1) cookie?
+		2) session?
+		3) $_GET?
+		4) $_POST? IMPOSSIBLE!
+		
+		NOTHING? header back to post48 "need user"
+		
+after this point $_SESSION will have:
+	name
+	latitude
+	longitude
+	place
+	
+	
+	

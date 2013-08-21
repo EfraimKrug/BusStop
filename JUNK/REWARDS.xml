@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<winnings>
+<prize>
+<points>5</points>
+<reward>most found (found more than anyone else at the stop)</reward>
+<short>mofo</short>
+</prize>
+<prize>
+<points>2</points>
+<reward>found once (good!)</reward></prize>
+<short>foon</short>
+<prize>
+<points>7</points>
+<reward>found most (found more people than anyone else at the stop)</reward>
+<short>fomo</short>
+</prize>
+<prize>
+<points>2</points>
+<reward>found one (good!)</reward>
+<short>afoon</short>
+</prize>
+<prize>
+<points>15</points>
+<reward>wallflower (only one not found)</reward>
+<short>walf</short>
+</prize>
+<prize>
+<points>1</points>
+<reward>dope (only one who didn't find anybody)</reward>
+<short>dope</short>
+</prize>
+<prize>
+<points>5</points>
+<reward>first one at the stop logged in</reward>
+<short>fili</short>
+</prize>
+<prize>
+<points>10</points>
+<reward>first one 3 consecutive days at the stop</reward>
+<short>firco3</short>
+</prize>
+<prize>
+<points>15</points>
+<reward>first one 5 consecutive days at the stop</reward>
+<short>firco5</short>
+</prize>
+<prize>
+<points>10</points>
+<reward>first one 3 days in one week at the stop</reward>
+<short>firwe3</short>
+</prize>
+<prize>
+<points>12</points>
+<reward>first one 5 days in one week at the stop</reward>
+<short>firwe5</short>
+</prize>
+<prize>
+<points>3</points>
+<reward>last one at the stop yesterday</reward></prize>
+<short>lasye</short>
+<prize>
+<points>17</points>
+<reward>first one to give someone a newspaper</reward>
+<short>firnew</short>
+</prize>
+<prize>
+<points>19</points>
+<reward>first one to give someone a coffee</reward>
+<short>fircof</short>
+</prize>
+<prize>
+<points>25</points>
+<reward>first two to shake hands</reward>
+<short>firshak</short>
+</prize>
+<prize>
+<points>30</points>
+<reward>first two to agree to meet someone else</reward>
+<short>fir2me</short>
+</prize>
+<prize>
+<points>10</points>
+<reward>first one met by two people</reward>
+<short>fir2met</short>
+</prize>
+<prize>
+<points>50</points>
+<reward>first five to say "humma humma hoo hah!" together!</reward>
+<short>hoohah</short>
+</prize>
+<prize>
+<points>10</points>
+<reward>first political discussion</reward>
+<short>firpo</short>
+</prize>
+<prize>
+<points>10</points>
+<reward>first religous discussion</reward>
+<short>firrel</short>
+</prize>
+<prize>
+<points>10</points>
+<reward>first literary discussion</reward>
+<short>firlit</short>
+</prize>
+<prize>
+<points>10</points>
+<reward>first academic discussion</reward>
+<short>firac</short>
+</prize>
+<prize>
+<points>10</points>
+<reward>first one to get the quotation</reward>
+<short>firquote</short>
+</prize>
+</winnings>

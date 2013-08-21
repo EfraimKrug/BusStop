@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<entries>
+<entry><reason>I found someone else</reason><points>1</points></entry>
+<entry><reason>Someone else found me</reason><points>2</points></entry>
+<entry><reason>I gave someone a newspaper</reason><points>3</points></entry>
+<entry><reason>Someone else gave me a newspaper</reason><points>4</points></entry>
+<entry><reason>I shook hands with someone else</reason><points>3</points></entry>
+<entry><reason>I gave someone a cup of coffee</reason><points>3</points></entry>
+<entry><reason>Someone else gave me a cup of coffee</reason><points>4</points></entry>
+<entry><reason>Two of us went to meet someone else</reason><points>5</points></entry>
+<entry><reason>Two people came to meet me</reason><points>5</points></entry>
+<entry><reason>We (5 people) said "HUMMA HUMMA HOO HA!"</reason><points>7</points></entry>
+<entry><reason>We had a political discussion</reason><points>3</points></entry>
+<entry><reason>We had a religious discussion</reason><points>3</points></entry>
+<entry><reason>We had a literary discussion</reason><points>3</points></entry>
+<entry><reason>We had a academic discussion</reason><points>3</points></entry>
+</entries>
